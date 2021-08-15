@@ -25,7 +25,7 @@ app.get("/api/customers",(req,res)=>{
     res.send(customers);
 
 });
-
+//-----------------------------------------GET --------------------------------------
 
 app.get("/api/customers/:id",(req,res)=>{
 
@@ -39,12 +39,12 @@ app.get("/api/customers/:id",(req,res)=>{
     }
     
 });
-
+//----------------------------------------POSTr----------------------------------------------------------
 app.post("/api/customers",(req,res)=>{
     const {error}=validateCustomer(req.body);
 
     if(error){
-        res.status(400).send(error.details[0].messaage);
+        res.status(400).send(error.details[0].message);
         return;
     }
 
@@ -57,12 +57,50 @@ app.post("/api/customers",(req,res)=>{
     res.send(customers);
 });
 
-function validateCustomer(customer){
-    const schema={
-        name:joi.string().min(3).max(10).required()
-     }
+//----------------------------------------PUT----------------------------------------------------------
 
-     return joi.validate(customer.schema);
+app.put("/api/customers/:id",(req,res)=>{
+    const customer=customers.find((c)=>c.id===parseInt(req.params.id));
+    
+    if(!customer){
+        res.status(404).send("<h2> Customer not find "+req.params.id+"</h2>");
+    }
+
+
+    const {error}=validateCustomer(req.body);
+
+    if(error){
+        res.status(400).send(error.details[0].message);
+        
+    }
+
+    customer.name=req.body.name;
+    res.send(customers);
+});
+
+//------------------------------------------DELETE-------------------------------------------------------------------
+
+app.delete("/api/customers/:id",(req,res)=>{
+
+    const customer=customers.find((c)=>c.id===parseInt(req.params.id));
+
+    if(!customer){
+        res.status(404).send("<h2>Not find id "+req.params.id+"/<h2>");
+    }
+
+    const index=customers.indexOf(customer);
+    customers.splice(index,1);
+
+    res.send("Customer "+customer.name+" removed Successfully!");
+
+});
+
+//_______________________________________________VALIDATION PART_________________________________________________________
+function validateCustomer(customer){
+    const schema=joi.object({name:joi.string().min(3).required()});
+
+    const validation=schema.validate(customer);
+    return validation;
 
 }
 
